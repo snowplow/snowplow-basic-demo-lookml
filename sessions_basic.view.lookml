@@ -21,23 +21,28 @@
       SELECT
         domain_userid,
         domain_sessionidx,
-        MIN(collector_tstamp) AS session_start_ts,
-        MAX(collector_tstamp) AS session_end_ts,
-        COUNT(*) AS number_of_events,
-        COUNT(DISTINCT page_urlpath) AS distinct_pages_viewed
+        MIN(collector_tstamp) AS session_start_tstamp,
+        MAX(collector_tstamp) AS session_end_tstamp,
+        MIN(dvce_tstamp) AS dvce_min_tstamp,
+        MAX(dvce_tstamp) AS dvce_max_tstamp,
+        COUNT(*) AS event_count,
+        COUNT(DISTINCT(FLOOR(EXTRACT(EPOCH FROM dvce_tstamp)/30)))/2::FLOAT AS time_engaged_with_minutes
       FROM
         atomic.events
-      WHERE domain_userid IS NOT NULL
+      WHERE domain_sessionidx IS NOT NULL
+        AND domain_userid IS NOT NULL
         AND domain_userid <> ''
+        AND e.dvce_tstamp IS NOT NULL
+        AND e.dvce_tstamp > '2000-01-01'
+        AND e.dvce_tstamp < '2030-01-01'
         AND
-        -- if prod -- collector_tstamp > '2014-01-01'
-        -- if dev  -- collector_tstamp > DATEADD (day, -2, GETDATE())
+        -- if dev  -- collector_tstamp > '2015-03-20'
       GROUP BY 1,2
-    
+
     sql_trigger_value: SELECT MAX(collector_tstamp) FROM ${events.SQL_TABLE_NAME}  # Trigger table generation when new data loaded into atomic.events
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx]
-    
+
 
   fields:
   
@@ -61,21 +66,21 @@
     sql: ${session_index}
   
   - dimension: start
-    sql: ${TABLE}.session_start_ts
+    sql: ${TABLE}.session_start_tstamp
   
   - dimension_group: start
     type: time
     timeframes: [time, hour, date, week, month]
-    sql: ${TABLE}.session_start_ts
+    sql: ${TABLE}.session_start_tstamp
     
   - dimension: end
-    sql: ${TABLE}.session_end_ts
+    sql: ${TABLE}.session_end_tstamp
     
   # Session duration #
 
   - dimension: session_duration_seconds
     type: int
-    sql: EXTRACT(EPOCH FROM (${TABLE}.session_end_ts - ${TABLE}.session_start_ts))
+    sql: EXTRACT(EPOCH FROM (${TABLE}.session_end_tstamp - ${TABLE}.session_start_tstamp))
 
   - dimension: session_duration_seconds_tiered
     type: tier
@@ -86,34 +91,19 @@
 
   - dimension: events_during_session
     type: int
-    sql: ${TABLE}.number_of_events
+    sql: ${TABLE}.event_count
     
   - dimension: bounce
     type: yesno
     sql: ${TABLE}.number_of_events = 1
   
   # New vs returning visitor #
+
   - dimension: new_vs_returning_visitor
     sql_case:
       new: ${TABLE}.domain_sessionidx = 1
       returning: ${TABLE}.domain_sessionidx > 1
       else: unknown
-
-  # Pages visited #
-  - dimension: distinct_pages_viewed
-    sql: ${TABLE}.distinct_pages_viewed
-    
-  - dimension: distinct_pages_viewed_tiered
-    type: tier
-    tiers: [1,2,3,4,5,10,25,100,1000]
-    sql: ${TABLE}.distinct_pages_viewed
-  
-  - dimension: history
-    sql: ${session_id}
-    html: |
-      <a href=events?fields=events.event_detail*&f[events.visit_id]={{value}}>Event Stream</a>
-  
-  
   
   # MEASURES #
 
