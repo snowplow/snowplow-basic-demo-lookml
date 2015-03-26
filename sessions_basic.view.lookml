@@ -157,4 +157,3 @@
   - measure: average_session_duration_seconds
     type: average
     sql: EXTRACT(EPOCH FROM (${end}-${start}))
-  
