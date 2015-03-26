@@ -19,12 +19,14 @@
   derived_table:
     sql: |
       SELECT
-        s.domain_userid,
-        s.domain_sessionidx,
-        s.session_start_ts,
-        s.session_end_ts,
-        s.number_of_events,
-        s.distinct_pages_viewed,
+        b.domain_userid,
+        b.domain_sessionidx,
+        b.session_start_tstamp,
+        b.session_end_tstamp,
+        b.dvce_min_tstamp,
+        b.dvce_max_tstamp,
+        b.event_count,
+        b.time_engaged_with_minutes,
         g.geo_country,
         g.geo_country_code_2_characters,
         g.geo_country_code_3_characters,
@@ -35,17 +37,18 @@
         g.geo_longitude,
         l.page_urlhost AS landing_page_host,
         l.page_urlpath AS landing_page_path,
-        l2.page_urlhost AS exit_page_host,
-        l2.page_urlpath AS exit_page_path,
-        s2.mkt_source,
-        s2.mkt_medium,
-        s2.mkt_term,
-        s2.mkt_campaign,
-        s2.refr_source,
-        s2.refr_medium,
-        s2.refr_term,
-        s2.refr_urlhost,
-        s2.refr_urlpath,
+        e.page_urlhost AS exit_page_host,
+        e.page_urlpath AS exit_page_path,
+        s.mkt_source,
+        s.mkt_medium,
+        s.mkt_term,
+        s.mkt_content,
+        s.mkt_campaign,
+        s.refr_source,
+        s.refr_medium,
+        s.refr_term,
+        s.refr_urlhost,
+        s.refr_urlpath,
         t.br_name,
         t.br_family,
         t.br_version,
@@ -70,26 +73,26 @@
         t.dvce_ismobile,
         t.dvce_screenwidth,
         t.dvce_screenheight
-      FROM ${sessions_basic.SQL_TABLE_NAME} AS s
+      FROM ${sessions_basic.SQL_TABLE_NAME} AS b
       LEFT JOIN ${sessions_geo.SQL_TABLE_NAME} AS g
-        ON s.domain_userid = g.domain_userid AND
-        s.domain_sessionidx = g.domain_sessionidx
+        ON  b.domain_userid = g.domain_userid
+        AND b.domain_sessionidx = g.domain_sessionidx
       LEFT JOIN ${sessions_landing_page.SQL_TABLE_NAME} AS l
-        ON s.domain_userid = l.domain_userid AND
-        s.domain_sessionidx = l.domain_sessionidx
-      LEFT JOIN ${sessions_last_page.SQL_TABLE_NAME} AS l2
-        ON s.domain_userid = l2.domain_userid AND
-        s.domain_sessionidx = l2.domain_sessionidx
-      LEFT JOIN ${sessions_source.SQL_TABLE_NAME} AS s2
-        ON s.domain_userid = s2.domain_userid AND
-        s.domain_sessionidx = s2.domain_sessionidx
+        ON  b.domain_userid = l.domain_userid
+        AND b.domain_sessionidx = l.domain_sessionidx
+      LEFT JOIN ${sessions_exit_page.SQL_TABLE_NAME} AS e
+        ON  b.domain_userid = e.domain_userid
+        AND b.domain_sessionidx = e.domain_sessionidx
+      LEFT JOIN ${sessions_source.SQL_TABLE_NAME} AS s
+        ON  b.domain_userid = s.domain_userid
+        AND b.domain_sessionidx = s.domain_sessionidx
       LEFT JOIN ${sessions_technology.SQL_TABLE_NAME} AS t
-        ON s.domain_userid = t.domain_userid AND
-        s.domain_sessionidx = t.domain_sessionidx
-    
-    sql_trigger_value: SELECT COUNT(*) FROM ${sessions_technology.SQL_TABLE_NAME}
+        ON  b.domain_userid = t.domain_userid
+        AND b.domain_sessionidx = t.domain_sessionidx
+
+    sql_trigger_value: SELECT COUNT(*) FROM ${sessions_technology.SQL_TABLE_NAME} # Generate this table after sessions_technology
     distkey: domain_userid
-    sortkeys: [domain_userid, domain_sessionidx, session_start_ts]
+    sortkeys: [domain_userid, domain_sessionidx]
     
   fields:
   # DIMENSIONS #
