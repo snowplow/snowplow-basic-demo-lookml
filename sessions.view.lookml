@@ -115,21 +115,21 @@
     sql: ${session_index}
   
   - dimension: start
-    sql: ${TABLE}.session_start_ts
+    sql: ${TABLE}.session_start_tstamp
   
   - dimension_group: start
     type: time
     timeframes: [time, date, week, month]
-    sql: ${TABLE}.session_start_ts
+    sql: ${TABLE}.session_start_tstamp
     
   - dimension: end
-    sql: ${TABLE}.session_end_ts
+    sql: ${TABLE}.session_end_tstamp
     
   # Session duration #
 
   - dimension: session_duration_seconds
     type: int
-    sql: EXTRACT(EPOCH FROM (${TABLE}.session_end_ts - ${TABLE}.session_start_ts))
+    sql: EXTRACT(EPOCH FROM (${TABLE}.session_end_tstamp - ${TABLE}.session_start_tstamp))
 
   - dimension: session_duration_seconds_tiered
     type: tier
@@ -140,16 +140,16 @@
 
   - dimension: events_during_session
     type: int
-    sql: ${TABLE}.number_of_events
+    sql: ${TABLE}.event_count
     
   - dimension: events_during_session_tiered
     type: tier
     tiers: [1,2,5,10,25,50,100,1000,10000]
-    sql: ${TABLE}.number_of_events
+    sql: ${TABLE}.event_count
     
   - dimension: bounce
     type: yesno
-    sql: ${TABLE}.number_of_events = 1
+    sql: ${TABLE}.event_count = 1
   
   # New vs returning visitor #
   - dimension: new_vs_returning_visitor
@@ -163,14 +163,6 @@
       <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
 
   # Pages visited #
-  - dimension: distinct_pages_viewed
-    sql: ${TABLE}.distinct_pages_viewed
-    
-  - dimension: distinct_pages_viewed_tiered
-    type: tier
-    tiers: [1,2,3,4,5,10,25,100,1000]
-    sql: ${TABLE}.distinct_pages_viewed
-  
   - dimension: event_stream
     sql: ${session_id}
     html: |
@@ -258,16 +250,19 @@
   - dimension: referer_url_path
     sql: ${TABLE}.refr_urlpath
     
-  # MKT fields (paid acquisition channels)
-    
+  # Marketing fields (paid acquisition channels)
+
+  - dimension: campaign_source
+    sql: ${TABLE}.mkt_source
+
   - dimension: campaign_medium
     sql: ${TABLE}.mkt_medium
   
-  - dimension: campaign_source
-    sql: ${TABLE}.mkt_source
-  
   - dimension: campaign_term
     sql: ${TABLE}.mkt_term
+  
+  - dimension: campaign_content
+    sql: ${TABLE}.mkt_content
   
   - dimension: campaign_name
     sql: ${TABLE}.mkt_campaign
@@ -349,12 +344,12 @@
   - measure: count
     type: count_distinct
     sql: ${session_id}
-    detail: individual_detail*
+    drill_fields: individual_detail*
 
   - measure: visitors_count
     type: count_distinct
     sql: ${user_id}
-    detail: detail*
+    drill_fields: detail*
     hidden: true
     
   - measure: bounced_sessions_count
@@ -362,7 +357,7 @@
     sql: ${session_id}
     filters:
       bounce: yes
-    detail: detail*
+    drill_fields: detail*
 
   - measure: bounce_rate
     type: number
@@ -374,12 +369,12 @@
     sql: ${session_id}
     filters:
       session_index: 1
-    detail: individual_detail*
+    drill_fields: individual_detail*
   
   - measure: sessions_from_returning_visitor_count
     type: number
     sql: ${count} - ${sessions_from_new_visitors_count}
-    detail: individual_detail*
+    drill_fields: individual_detail*
   
   - measure: new_visitors_count_over_total_visitors_count
     type: number
@@ -409,14 +404,14 @@
   - measure: country_count
     type: count_distinct
     sql: ${geography_country}
-    detail: 
+    drill_fields: 
     - geography_country
     - detail*
     
   - measure: region_count
     type: count_distinct
     sql: ${geography_region}
-    detail: 
+    drill_fields: 
     - geography_country
     - geography_region
     - detail*
@@ -424,7 +419,7 @@
   - measure: city_count
     type: count_distinct
     sql: ${geography_city}
-    detail: 
+    drill_fields: 
     - geography_country
     - geography_region
     - geography_city
@@ -433,7 +428,7 @@
   - measure: zip_code_count
     type: count_distinct
     sql: ${geography_zipcode}
-    detail:  
+    drill_fields:  
     - geography_country
     - geography_region
     - geography_city
@@ -443,14 +438,14 @@
   - measure: campaign_medium_count
     type: count_distinct
     sql: ${campaign_medium}
-    detail: 
+    drill_fields: 
     - campaign_medium
     - detail*
     
   - measure: campaign_source_count
     type: count_distinct
     sql: ${campaign_source}
-    detail: 
+    drill_fields: 
     - campaign_medium
     - campaign_source
     - detail*
@@ -458,7 +453,7 @@
   - measure: campaign_term_count
     type: count_distinct
     sql: ${campaign_term}
-    detail: 
+    drill_fields: 
     - campaign_medium
     - campaign_source
     - campaign_term 
@@ -467,7 +462,7 @@
   - measure: campaign_count
     type: count_distinct
     sql: ${campaign_name}
-    detail: 
+    drill_fields: 
     - campaign_medium
     - campaign_source
     - campaign_term
@@ -477,14 +472,14 @@
   - measure: referer_medium_count
     type: count_distinct
     sql: ${referer_medium}
-    detail: 
+    drill_fields: 
     - referer_medium
     - detail*
     
   - measure: referer_source_count
     type: count_distinct
     sql: ${referer_source}
-    detail: 
+    drill_fields: 
     - referer_medium
     - referer_source
     - detail*
@@ -503,23 +498,23 @@
   - measure: device_count
     type: count_distinct
     sql: ${device_type}
-    detail: detail*
+    drill_fields: detail*
   
   - measure: operating_system_count
     type: count_distinct
     sql: ${operating_system}
-    detail: 
+    drill_fields: 
     - operating_system
     - detail*
   
   - measure: browser_count
     type: count_distinct
     sql: ${browser}
-    detail: 
+    drill_fields: 
     - browser
     - detail*
     
-  # Detail #
+  # Drill Fields #
   sets:
   
     detail:
