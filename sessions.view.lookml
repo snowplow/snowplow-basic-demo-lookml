@@ -487,7 +487,7 @@
   - measure: referer_term_count
     type: count_distinct
     sql: ${referer_term}
-    detail: 
+    drill_fields: 
     - referer_medium
     - referer_source
     - referer_term

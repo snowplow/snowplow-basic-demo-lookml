@@ -37,10 +37,10 @@
 ## Views to support events
 #- base_view: atomic_events
 
-- base_view: sessions
-  joins: 
-  - join: visitors
-    sql_on: |
-      sessions.domain_userid = visitors.domain_userid
+- explore: sessions
+#  joins: 
+#  - join: visitors
+#    sql_on: |
+#      sessions.domain_userid = visitors.domain_userid
 
 #- base_view: visitors
