@@ -171,10 +171,3 @@
     
   - measure: count
     type: count
-    
-  sets:
-    detail:
-      - visits.visit_count
-      - visits.bounce_rate
-      - events.approx_usgae_per_visitor_in_minutes
-      - events.events_per_visit

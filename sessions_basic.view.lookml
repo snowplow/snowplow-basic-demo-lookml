@@ -75,7 +75,12 @@
     
   - dimension: end
     sql: ${TABLE}.session_end_tstamp
-    
+
+  - dimension: history
+    sql: ${session_id}
+    html: |
+      <a href=events?fields=events.event_detail*&f[events.visit_id]={{value}}>Event Stream</a>
+
   # Session duration #
 
   - dimension: session_duration_seconds
@@ -104,7 +109,7 @@
       new: ${TABLE}.domain_sessionidx = 1
       returning: ${TABLE}.domain_sessionidx > 1
       else: unknown
-  
+
   # MEASURES #
 
   - measure: count
