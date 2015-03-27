@@ -54,7 +54,7 @@
   
   # DIMENSIONS # 
   
-  # Basic dimensions #
+  # Basic dimensions
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
@@ -195,7 +195,7 @@
     decimals: 2
     sql: ${session_count}/NULLIF(${count},0)::REAL
   
-  # Landing page measures #
+  # Landing page measures
   
   - measure: landing_page_count
     type: count_distinct
@@ -204,7 +204,7 @@
     - landing_page
     - detail*
   
-  # Traffic source measures #
+  # Marketing measures (paid acquisition channels)
   
   - measure: campaign_medium_count
     type: count_distinct
@@ -238,14 +238,16 @@
     - campaign_source
     - campaign_term
     - detail*
-    
+  
+  # Referer measures (all acquisition channels)
+  
   - measure: referer_medium_count
     type: count_distinct
     sql: ${referer_medium}
     drill_fields:
     - referer_medium
     - detail*
-    
+  
   - measure: referer_source_count
     type: count_distinct
     sql: ${referer_source}
@@ -253,7 +255,7 @@
     - referer_medium
     - referer_source
     - detail*
-    
+  
   - measure: referer_term_count
     type: count_distinct
     sql: ${referer_term}
@@ -278,7 +280,7 @@
       - referer_medium_count
       - referer_source_count
       - referer_term_count
-      
+    
     individual_detail:
       - user_id
       - first_touch
@@ -291,7 +293,7 @@
       - campaign_medium
       - campaign_source
       - campaign_name
-      - landing_page_url
+      - landing_page
       - number_of_sessions
       - number_of_events
       - session_stream
