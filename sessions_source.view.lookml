@@ -41,7 +41,7 @@
         INNER JOIN ${sessions_basic.SQL_TABLE_NAME} AS b
           ON  a.domain_userid = b.domain_userid
           AND a.domain_sessionidx = b.domain_sessionidx
-          AND a.dvce_tstamp = b.dvce_min_tstamp -- Replaces the FIRST VALUE window function in SQL
+          AND a.dvce_tstamp = b.dvce_min_tstamp
         WHERE a.refr_medium != 'internal' -- Not an internal referer
           AND (
             NOT(a.refr_medium IS NULL OR a.refr_medium = '') OR
@@ -53,11 +53,11 @@
         GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12 -- Aggregate identital rows (that happen to have the same dvce_tstamp)
       )
       WHERE rank = 1 -- If there are different rows with the same dvce_tstamp, rank and pick the first row
-
+    
     sql_trigger_value: SELECT COUNT(*) FROM ${sessions_exit_page.SQL_TABLE_NAME} # Generate this table after sessions_exit_page
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx]
-
+  
   fields:
   
   # DIMENSIONS #
@@ -94,59 +94,59 @@
     sql: ${TABLE}.refr_urlpath
     
   # Marketing fields (paid acquisition channels)
-
-  - dimension: campaign_source
-    sql: ${TABLE}.mkt_source
-
+  
   - dimension: campaign_medium
     sql: ${TABLE}.mkt_medium
+  
+  - dimension: campaign_source
+    sql: ${TABLE}.mkt_source
   
   - dimension: campaign_term
     sql: ${TABLE}.mkt_term
   
+  - dimension: campaign_name
+    sql: ${TABLE}.mkt_campaign
+  
   - dimension: campaign_content
     sql: ${TABLE}.mkt_content
   
-  - dimension: campaign_name
-    sql: ${TABLE}.mkt_campaign
-
   # MEASURES #
-
-  - measure: campaign_source_count
-    type: count_distinct
-    sql: ${campaign_source}
-    detail: detail*
-
+  
   - measure: campaign_medium_count
     type: count_distinct
     sql: ${campaign_medium}
-    detail: detail*
-    
+    drill_fields: detail*
+  
+  - measure: campaign_source_count
+    type: count_distinct
+    sql: ${campaign_source}
+    drill_fields: detail*
+  
   - measure: campaign_term_count
     type: count_distinct
     sql: ${campaign_term}
-    detail: detail*
-      
+    drill_fields: detail*
+  
   - measure: campaign_count
     type: count_distinct
     sql: ${campaign_name}
-    detail: detail*
-    
+    drill_fields: detail*
+  
   - measure: referer_medium_count
     type: count_distinct
     sql: ${referer_medium}
-    detail: detail*
-    
+    drill_fields: detail*
+  
   - measure: referer_source_count
     type: count_distinct
     sql: ${referer_source}
-    detail: detail*
-    
+    drill_fields: detail*
+  
   - measure: referer_term_count
     type: count_distinct
     sql: ${referer_term}
-    detail: detail*
-    
+    drill_fields: detail*
+  
   - measure: count
     type: count
-      
+  
