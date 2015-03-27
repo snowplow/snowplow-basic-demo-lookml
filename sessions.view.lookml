@@ -362,25 +362,25 @@
     sql: ${TABLE}.br_cookies
   
   # MEASURES #
-
+  
   - measure: count
     type: count_distinct
     sql: ${session_id}
     drill_fields: individual_detail*
-
+  
   - measure: visitors_count
     type: count_distinct
     sql: ${user_id}
     drill_fields: detail*
     hidden: true
-    
+  
   - measure: bounced_sessions_count
     type: count_distinct
     sql: ${session_id}
     filters:
       bounce: yes
     drill_fields: detail*
-
+  
   - measure: bounce_rate
     type: number
     decimals: 2
@@ -402,26 +402,34 @@
     type: number
     decimals: 2
     sql: ${sessions_from_new_visitors_count}/NULLIF(${count},0)::REAL
-
+  
   - measure: returning_visitors_count_over_total_visitors_count
     type: number
     decimals: 2
     sql: ${sessions_from_returning_visitor_count}/NULLIF(${count},0)::REAL
-    
-  - measure: events_count
+  
+  - measure: event_count
     type: sum
-    sql: ${TABLE}.number_of_events
-    
+    sql: ${TABLE}.event_count
+  
   - measure: events_per_session
     type: number
     decimals: 2
-    sql: ${events_count}/NULLIF(${count},0)::REAL
-    
+    sql: ${event_count}/NULLIF(${count},0)::REAL
+  
   - measure: events_per_visitor
     type: number
     decimals: 2
-    sql: ${events_count}/NULLIF(${visitors_count},0)::REAL
-    
+    sql: ${event_count}/NULLIF(${visitors_count},0)::REAL
+  
+  - measure: average_session_duration_seconds
+    type: average
+    sql: EXTRACT(EPOCH FROM (${end}-${start}))
+  
+  - measure: average_time_engaged_minutes
+    type: average
+    sql: ${time_engaged_with_minutes}
+  
   # Geo measures
   
   - measure: country_count
@@ -448,23 +456,25 @@
     - geography_city
     - detail*
       
-  - measure: zip_code_count
-    type: count_distinct
-    sql: ${geography_zipcode}
-    drill_fields:  
-    - geography_country
-    - geography_region
-    - geography_city
-    - geography_zipcode
-    - detail*
-    
+  #- measure: zip_code_count
+  #  type: count_distinct
+  #  sql: ${geography_zipcode}
+  #  drill_fields:  
+  #  - geography_country
+  #  - geography_region
+  #  - geography_city
+  #  - geography_zipcode
+  #  - detail*
+  
+  # Marketing measures
+  
   - measure: campaign_medium_count
     type: count_distinct
     sql: ${campaign_medium}
     drill_fields: 
     - campaign_medium
     - detail*
-    
+  
   - measure: campaign_source_count
     type: count_distinct
     sql: ${campaign_source}
@@ -472,7 +482,7 @@
     - campaign_medium
     - campaign_source
     - detail*
-    
+  
   - measure: campaign_term_count
     type: count_distinct
     sql: ${campaign_term}
@@ -481,7 +491,7 @@
     - campaign_source
     - campaign_term 
     - detail*
-      
+  
   - measure: campaign_count
     type: count_distinct
     sql: ${campaign_name}
@@ -491,14 +501,16 @@
     - campaign_term
     - campaign_name
     - detail*
-    
+  
+  # Referal measures
+  
   - measure: referer_medium_count
     type: count_distinct
     sql: ${referer_medium}
     drill_fields: 
     - referer_medium
     - detail*
-    
+  
   - measure: referer_source_count
     type: count_distinct
     sql: ${referer_source}
@@ -506,7 +518,7 @@
     - referer_medium
     - referer_source
     - detail*
-    
+  
   - measure: referer_term_count
     type: count_distinct
     sql: ${referer_term}
@@ -515,7 +527,7 @@
     - referer_source
     - referer_term
     - detail*
-    
+  
   # Technology measures 
   
   - measure: device_count
@@ -536,7 +548,7 @@
     drill_fields: 
     - browser
     - detail*
-    
+  
   # DRILL FIELDS #
   
   sets:
