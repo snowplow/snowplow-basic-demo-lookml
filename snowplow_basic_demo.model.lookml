@@ -28,7 +28,10 @@
       sessions.domain_userid = visitors.domain_userid
 
 - explore: visitors
+
+- explore: page_views
   joins:
   - join: sessions
     sql_on: |
-      visitors.domain_userid = sessions.domain_userid
+      page_views.domain_userid = sessions.domain_userid AND page_views.domain_sessionidx = sessions.domain_sessionidx
+  
