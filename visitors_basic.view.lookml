@@ -59,7 +59,10 @@
     type: time
     timeframes: [time, date, week, month]
     sql: ${TABLE}.first_touch_tstamp
-    
+  
+  - dimension: last_touch
+    sql: ${TABLE}.last_touch_tstamp
+  
   - dimension: last_touch
     type: time
     timeframes: [time, date, week, month]
@@ -85,7 +88,7 @@
   - dimension: number_of_sessions_tiered
     type: tier
     tiers: [1,2,5,10,25,50,100,1000]
-    sql: ${session_count}
+    sql: ${number_of_sessions}
     
   - dimension: session_stream
     sql: ${user_id}

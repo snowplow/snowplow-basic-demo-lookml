@@ -60,43 +60,37 @@
     sql: ${TABLE}.domain_userid
   
   - dimension: first_touch
-    sql: ${TABLE}.first_touch
+    sql: ${TABLE}.first_touch_tstamp
   
   - dimension_group: first_touch
     type: time
     timeframes: [time, hour, date, week, month]
-    sql: ${TABLE}.first_touch
+    sql: ${TABLE}.first_touch_tstamp
+  
+  - dimension: last_touch
+    sql: ${TABLE}.last_touch_tstamp
   
   - dimension: last_touch
     type: time
     timeframes: [time, hour, date, week, month]
-    sql: ${TABLE}.last_touch
+    sql: ${TABLE}.last_touch_tstamp
   
   - dimension: events_during_lifetime
     type: int
-    sql: ${TABLE}.number_of_events
+    sql: ${TABLE}.event_count
   
   - dimension: events_during_lifetime_tiered
     type: tier
     tiers: [1,5,10,25,50,100,1000,10000,100000]
-    sql: ${TABLE}.number_of_events
+    sql: ${TABLE}.event_count
   
   - dimension: bounce
     type: yesno
-    sql: ${TABLE}.number_of_events = 1
-  
-  - dimension: distinct_pages_viewed
-    type: int
-    sql: ${TABLE}.distinct_pages_viewed
-  
-  - dimension: distinct_pages_viewed_tiered
-    type: tier
-    tiers: [1,2,5,10,25,50,100,1000]
-    sql: ${distinct_pages_viewed}
+    sql: ${TABLE}.event_count = 1
   
   - dimension: number_of_sessions
     type: int
-    sql: ${TABLE}.number_of_sessions
+    sql: ${TABLE}.session_count
   
   - dimension: number_of_sessions_tiered
     type: tier
@@ -115,16 +109,16 @@
   
   # Landing page dimensions #
   
-  - dimension: landing_page_url_host
+  - dimension: landing_page_host
     sql: ${TABLE}.page_urlhost
   
-  - dimension: landing_page_url_path
+  - dimension: landing_page_path
     sql: ${TABLE}.page_urlpath
   
-  - dimension: landing_page_url
-    sql: ${TABLE}.page_urlhost || ${TABLE}.page_urlpath  
+  - dimension: landing_page
+    sql: ${TABLE}.page_urlhost || ${TABLE}.page_urlpath
   
-  # Referer source dimensions #
+  # Referer fields (all acquisition channels)
   
   - dimension: referer_medium
     sql_case:
@@ -146,7 +140,7 @@
   - dimension: referer_url_path
     sql: ${TABLE}.refr_urlpath
   
-  # MKT fields (paid acquisition channels)
+  # Marketing fields (paid acquisition channels)
   
   - dimension: campaign_medium
     sql: ${TABLE}.mkt_medium
@@ -160,20 +154,23 @@
   - dimension: campaign_name
     sql: ${TABLE}.mkt_campaign
   
+  - dimension: campaign_content
+    sql: ${TABLE}.mkt_content
+  
   # MEASURES #
-      
+  
   - measure: count
     type: count_distinct
     sql: ${user_id}
-    detail: individual_detail*
-    
+    drill_fields: individual_detail*
+  
   - measure: bounced_visitor_count
     type: count_distinct
     sql: ${user_id}
     filter:
       bounce: yes
-    detail: detail*
-    
+    drill_fields: detail*
+  
   - measure: bounce_rate
     type: number
     decimals: 2
@@ -191,7 +188,7 @@
   - measure: sessions_count
     type: sum
     sql: ${TABLE}.number_of_sessions
-    detail: details*
+    drill_fields: details*
     
   - measure: sessions_per_visitor
     type: number
@@ -203,7 +200,7 @@
   - measure: landing_page_count
     type: count_distinct
     sql: ${landing_page_url}
-    detail:
+    drill_fields:
     - landing_page_url
     - detail*
     
@@ -212,14 +209,14 @@
   - measure: campaign_medium_count
     type: count_distinct
     sql: ${campaign_medium}
-    detail: 
+    drill_fields: 
     - campaign_medium
     - detail*
     
   - measure: campaign_source_count
     type: count_distinct
     sql: ${campaign_source}
-    detail: 
+    drill_fields: 
     - campaign_medium
     - campaign_source
     - detail*
@@ -227,7 +224,7 @@
   - measure: campaign_term_count
     type: count_distinct
     sql: ${campaign_term}
-    detail: 
+    drill_fields: 
     - campaign_medium
     - campaign_source
     - campaign_term
@@ -236,7 +233,7 @@
   - measure: campaign_count
     type: count_distinct
     sql: ${campaign_name}
-    detail: 
+    drill_fields: 
     - campaign_medium
     - campaign_source
     - campaign_term
@@ -245,14 +242,14 @@
   - measure: referer_medium_count
     type: count_distinct
     sql: ${referer_medium}
-    detail: 
+    drill_fields:
     - referer_medium
     - detail*
     
   - measure: referer_source_count
     type: count_distinct
     sql: ${referer_source}
-    detail: 
+    drill_fields:
     - referer_medium
     - referer_source
     - detail*
@@ -260,7 +257,7 @@
   - measure: referer_term_count
     type: count_distinct
     sql: ${referer_term}
-    detail: 
+    drill_fields:
     - referer_medium
     - referer_source
     - referer_term
