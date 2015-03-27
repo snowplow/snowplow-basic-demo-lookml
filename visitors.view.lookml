@@ -42,9 +42,9 @@
         s.refr_urlpath
       FROM ${visitors_basic.SQL_TABLE_NAME} b
       LEFT JOIN ${visitors_landing_page.SQL_TABLE_NAME} AS l
-        ON b.blended_user_id = l.blended_user_id
+        ON b.domain_userid = l.domain_userid
       LEFT JOIN ${visitors_source.SQL_TABLE_NAME} AS s
-        ON b.blended_user_id = s.blended_user_id
+        ON b.domain_userid = s.domain_userid
     
     sql_trigger_value: SELECT COUNT(*) FROM ${visitors_source.SQL_TABLE_NAME} # Generate this table after visitors_source
     distkey: domain_userid
