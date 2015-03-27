@@ -175,35 +175,35 @@
     type: number
     decimals: 2
     sql: ${bounced_visitor_count}/NULLIF(${count},0)::REAL
-    
-  - measure: events_count
+  
+  - measure: event_count
     type: sum
-    sql: ${TABLE}.number_of_events
-    
+    sql: ${TABLE}.event_count
+  
   - measure: events_per_visitor
     type: number
     decimals: 2
-    sql: ${events_count}/NULLIF(${count},0)::REAL
-    
-  - measure: sessions_count
+    sql: ${event_count}/NULLIF(${count},0)::REAL
+  
+  - measure: session_count
     type: sum
-    sql: ${TABLE}.number_of_sessions
+    sql: ${TABLE}.session_count
     drill_fields: details*
-    
+  
   - measure: sessions_per_visitor
     type: number
     decimals: 2
-    sql: ${sessions_count}/NULLIF(${count},0)::REAL
-    
+    sql: ${session_count}/NULLIF(${count},0)::REAL
+  
   # Landing page measures #
-    
+  
   - measure: landing_page_count
     type: count_distinct
-    sql: ${landing_page_url}
+    sql: ${landing_page}
     drill_fields:
-    - landing_page_url
+    - landing_page
     - detail*
-    
+  
   # Traffic source measures #
   
   - measure: campaign_medium_count
@@ -262,7 +262,9 @@
     - referer_source
     - referer_term
     - detail*
-
+  
+  # DRILL FIELDS #
+  
   sets:    
     detail:
       - count
