@@ -404,14 +404,14 @@
   - measure: country_count
     type: count_distinct
     sql: ${geography_country}
-    drill_fields: 
+    drill_fields:
     - geography_country
     - detail*
     
   - measure: region_count
     type: count_distinct
     sql: ${geography_region}
-    drill_fields: 
+    drill_fields:
     - geography_country
     - geography_region
     - detail*
@@ -419,7 +419,7 @@
   - measure: city_count
     type: count_distinct
     sql: ${geography_city}
-    drill_fields: 
+    drill_fields:
     - geography_country
     - geography_region
     - geography_city

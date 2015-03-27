@@ -31,19 +31,18 @@
         atomic.events
       WHERE domain_sessionidx IS NOT NULL
         AND domain_userid IS NOT NULL
-        AND domain_userid <> ''
+        AND domain_userid != ''
         AND e.dvce_tstamp IS NOT NULL
-        AND e.dvce_tstamp > '2000-01-01'
-        AND e.dvce_tstamp < '2030-01-01'
-        AND
-        -- if dev  -- collector_tstamp > '2015-03-20'
+        AND e.dvce_tstamp > '2000-01-01' -- Prevent SQL errors
+        AND e.dvce_tstamp < '2030-01-01' -- Prevent SQL errors
+        -- if dev -- AND collector_tstamp > '2015-03-20'
       GROUP BY 1,2
-
-    sql_trigger_value: SELECT MAX(collector_tstamp) FROM ${events.SQL_TABLE_NAME}  # Trigger table generation when new data loaded into atomic.events
+  
+    sql_trigger_value: SELECT MAX(collector_tstamp) FROM ${events.SQL_TABLE_NAME}  # Trigger table generation when new data was loaded into atomic.events
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx]
-
-
+  
+  
   fields:
   
   # DIMENSIONS #
@@ -91,36 +90,44 @@
     type: tier
     tiers: [0,1,5,10,30,60,300,900]
     sql: ${session_duration_seconds}
-
+  
+  - dimension: time_engaged_with_minutes
+    sql: ${TABLE}.time_engaged_with_minutes
+  
+  - dimension: time_engaged_with_minutes_tiered
+    type: tier
+    tiers: [0,1,5,10,30,60,300,900]
+    sql: ${time_engaged_with_minutes}
+  
   # Events per visit and bounces (infered) #
-
+  
   - dimension: events_during_session
     type: int
     sql: ${TABLE}.event_count
     
   - dimension: bounce
     type: yesno
-    sql: ${TABLE}.number_of_events = 1
+    sql: ${TABLE}.event_count = 1
   
-  # New vs returning visitor #
-
+  # New versus returning visitor #
+  
   - dimension: new_vs_returning_visitor
     sql_case:
       new: ${TABLE}.domain_sessionidx = 1
       returning: ${TABLE}.domain_sessionidx > 1
       else: unknown
-
+  
   # MEASURES #
-
+  
   - measure: count
     type: count_distinct
     sql: ${session_id}
-    detail: detail*
-
+    drill_fields: detail*
+  
   - measure: visitors_count
     type: count_distinct
     sql: ${user_id}
-    detail: detail*
+    drill_fields: detail*
     hidden: true
     
   - measure: bounced_sessions_count
@@ -128,8 +135,8 @@
     sql: ${session_id}
     filters:
       bounce: yes
-    detail: detail*
-
+    drill_fields: detail*
+  
   - measure: bounce_rate
     type: number
     decimals: 2
@@ -140,25 +147,30 @@
     sql: ${session_id}
     filters:
       session_index: 1
-    detail: detail*
+    drill_fields: detail*
   
   - measure: sessions_from_returning_visitor_count
     type: number
     sql: ${count} - ${sessions_from_new_visitors_count}
-    detail: detail*
+    drill_fields: detail*
   
   - measure: new_visitors_count_over_total_visitors_count
     type: number
     decimals: 2
     sql: ${sessions_from_new_visitors_count}/NULLIF(${count},0)::REAL
-    detail: detail*
-
+    drill_fields: detail*
+  
   - measure: returning_visitors_count_over_total_visitors_count
     type: number
     decimals: 2
     sql: ${sessions_from_returning_visitor_count}/NULLIF(${count},0)::REAL
-    detail: detail*
+    drill_fields: detail*
   
   - measure: average_session_duration_seconds
     type: average
     sql: EXTRACT(EPOCH FROM (${end}-${start}))
+  
+  - measure: average_time_engaged_minutes
+    type: average
+    sql: ${time_engaged_with_minutes}
+  
