@@ -43,4 +43,6 @@
 #    sql_on: |
 #      sessions.domain_userid = visitors.domain_userid
 
+- explore: visitors
+
 #- base_view: visitors
