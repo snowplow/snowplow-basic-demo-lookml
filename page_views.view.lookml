@@ -125,144 +125,41 @@
       <a href=events?fields=events.event_detail*&f[events.user_id]={{value}}>Event stream</a>
   
   # MEASURES #
-  
+
   - measure: count
     type: count_distinct
-    sql: ${user_id}
+    sql: ${session_id} || ${page}
     drill_fields: individual_detail*
+
+  - measure: sessions_count
+    type: count_distinct
+    sql: ${session_id}
+    drill_fields: detail*
   
-  - measure: bounced_visitor_count
+  - measure: visitors_count
     type: count_distinct
     sql: ${user_id}
-    filter:
+    drill_fields: detail*
+    hidden: true
+  
+  - measure: bounced_page_views_count
+    type: count_distinct
+    sql: ${session_id} || ${page}
+    filters:
       bounce: yes
     drill_fields: detail*
   
   - measure: bounce_rate
     type: number
     decimals: 2
-    sql: ${bounced_visitor_count}/NULLIF(${count},0)::REAL
+    sql: ${bounced_page_views_count}/NULLIF(${count},0)::REAL
   
   - measure: event_count
     type: sum
     sql: ${TABLE}.event_count
   
-  - measure: events_per_visitor
+  - measure: events_per_page_views
     type: number
     decimals: 2
     sql: ${event_count}/NULLIF(${count},0)::REAL
   
-  - measure: session_count
-    type: sum
-    sql: ${TABLE}.session_count
-    drill_fields: details*
-  
-  - measure: sessions_per_visitor
-    type: number
-    decimals: 2
-    sql: ${session_count}/NULLIF(${count},0)::REAL
-  
-  # Landing page measures
-  
-  - measure: landing_page_count
-    type: count_distinct
-    sql: ${landing_page}
-    drill_fields:
-    - landing_page
-    - detail*
-  
-  # Marketing measures (paid acquisition channels)
-  
-  - measure: campaign_medium_count
-    type: count_distinct
-    sql: ${campaign_medium}
-    drill_fields: 
-    - campaign_medium
-    - detail*
-    
-  - measure: campaign_source_count
-    type: count_distinct
-    sql: ${campaign_source}
-    drill_fields: 
-    - campaign_medium
-    - campaign_source
-    - detail*
-    
-  - measure: campaign_term_count
-    type: count_distinct
-    sql: ${campaign_term}
-    drill_fields: 
-    - campaign_medium
-    - campaign_source
-    - campaign_term
-    - detail*
-      
-  - measure: campaign_count
-    type: count_distinct
-    sql: ${campaign_name}
-    drill_fields: 
-    - campaign_medium
-    - campaign_source
-    - campaign_term
-    - detail*
-  
-  # Referer measures (all acquisition channels)
-  
-  - measure: referer_medium_count
-    type: count_distinct
-    sql: ${referer_medium}
-    drill_fields:
-    - referer_medium
-    - detail*
-  
-  - measure: referer_source_count
-    type: count_distinct
-    sql: ${referer_source}
-    drill_fields:
-    - referer_medium
-    - referer_source
-    - detail*
-  
-  - measure: referer_term_count
-    type: count_distinct
-    sql: ${referer_term}
-    drill_fields:
-    - referer_medium
-    - referer_source
-    - referer_term
-    - detail*
-  
-  # DRILL FIELDS #
-  
-  sets:    
-    detail:
-      - count
-      - bounce_rate
-      - sessions_per_visitor
-      - events_per_visitor
-      - campaign_medium_count
-      - campaign_source_count
-      - campaign_term_count
-      - campaign_count
-      - referer_medium_count
-      - referer_source_count
-      - referer_term_count
-    
-    individual_detail:
-      - user_id
-      - first_touch
-      - last_touch
-      - referer_medium
-      - referer_source
-      - referer_host
-      - referer_url_host
-      - referer_url_path
-      - campaign_medium
-      - campaign_source
-      - campaign_name
-      - landing_page
-      - number_of_sessions
-      - number_of_events
-      - session_stream
-      - event_stream
-    
