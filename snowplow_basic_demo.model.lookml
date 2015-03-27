@@ -21,28 +21,14 @@
 - include: "*.view.lookml"        # include all the views
 - include: "*.dashboard.lookml"   # include all the dashboards
 
-#- base_view: signup_form_submitted
-#- base_view: trial_form_submitted
-
-#- base_view: events  
-#  joins:
-#  - join: sessions
-#    sql_on: |
-#      events.domain_userid = sessions.domain_userid AND
-#      events.domain_sessionidx = sessions.domain_sessionidx
-#  - join: visitors
-#    sql_on: |
-#      events.domain_userid = visitors.domain_userid
-
-## Views to support events
-#- base_view: atomic_events
-
 - explore: sessions
-#  joins:
-#  - join: visitors
-#    sql_on: |
-#      sessions.domain_userid = visitors.domain_userid
+  joins:
+  - join: visitors
+    sql_on: |
+      sessions.domain_userid = visitors.domain_userid
 
 - explore: visitors
-
-#- base_view: visitors
+  joins:
+  - join: sessions
+    sql_on: |
+      visitors.domain_userid = sessions.domain_userid
