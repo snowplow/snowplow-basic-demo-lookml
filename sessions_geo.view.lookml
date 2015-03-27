@@ -60,7 +60,7 @@
   
   # DIMENSIONS #
   
-  # Basic dimensions #
+  # Basic dimensions
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
@@ -69,7 +69,7 @@
     type: int
     sql: ${TABLE}.domain_sessionidx
 
-  # Geo fields #
+  # Geo fields
   
   - dimension: geography_country
     sql: ${TABLE}.geo_country
@@ -98,6 +98,7 @@
   # MEASURES #
   
   # Geo measures
+  
   - measure: country_count
     type: count_distinct
     sql: ${geography_country}

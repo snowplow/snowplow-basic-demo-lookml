@@ -72,7 +72,7 @@
   
   # DIMENSIONS #
   
-  # Basic dimensions #
+  # Basic dimensions
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
@@ -81,7 +81,7 @@
     type: int
     sql: ${TABLE}.domain_sessionidx
   
-  # Device fields #
+  # Device fields
   
   - dimension: device_type
     sql: ${TABLE}.dvce_type
@@ -96,7 +96,7 @@
   - dimension: device_screen_height
     sql: ${TABLE}.dvce_screenheight
   
-  # OS fields #
+  # OS fields
     
   - dimension: operating_system
     sql: ${TABLE}.os_name
@@ -107,7 +107,7 @@
   - dimension: operating_system_manufacturer
     sql: ${TABLE}.os_manufacturer
     
-  # Browser fields #
+  # Browser fields
   
   - dimension: browser
     sql: ${TABLE}.br_name

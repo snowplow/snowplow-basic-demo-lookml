@@ -62,7 +62,7 @@
   
   # DIMENSIONS #
   
-  # Basic dimensions #
+  # Basic dimensions
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
@@ -71,7 +71,7 @@
     type: int
     sql: ${TABLE}.domain_sessionidx
     
-  # Referer fields (all acquisition channels) #
+  # Referer fields (all acquisition channels)
     
   - dimension: referer_medium
     sql_case:

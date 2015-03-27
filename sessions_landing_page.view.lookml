@@ -44,7 +44,7 @@
     
   # DIMENSIONS #
   
-  # Basic dimensions #
+  # Basic dimensions
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
@@ -53,22 +53,22 @@
     type: int
     sql: ${TABLE}.domain_sessionidx
   
-  # Landing page dimensions #
+  # Landing page dimensions
   
-  - dimension: landing_page_url_host
+  - dimension: landing_page_host
     sql: ${TABLE}.page_urlhost
   
-  - dimension: landing_page_url_path
+  - dimension: landing_page_path
     sql: ${TABLE}.page_urlpath
   
-  - dimension: landing_page_url
+  - dimension: landing_page
     sql: ${TABLE}.page_urlhost || ${TABLE}.page_urlpath
   
   # MEASURES #
   
   - measure: landing_page_count
     type: count_distinct
-    sql: ${landing_page_url}
+    sql: ${landing_page}
   
   - measure: count
     type: count

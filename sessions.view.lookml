@@ -89,15 +89,15 @@
       LEFT JOIN ${sessions_technology.SQL_TABLE_NAME} AS t
         ON  b.domain_userid = t.domain_userid
         AND b.domain_sessionidx = t.domain_sessionidx
-
+    
     sql_trigger_value: SELECT COUNT(*) FROM ${sessions_technology.SQL_TABLE_NAME} # Generate this table after sessions_technology
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx]
-    
+  
   fields:
   # DIMENSIONS #
   
-  # Basic dimensions #
+  # Basic dimensions
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
@@ -119,14 +119,19 @@
   
   - dimension_group: start
     type: time
-    timeframes: [time, date, week, month]
+    timeframes: [time, hour, date, week, month]
     sql: ${TABLE}.session_start_tstamp
     
   - dimension: end
     sql: ${TABLE}.session_end_tstamp
-    
-  # Session duration #
-
+  
+  - dimension: event_stream
+    sql: ${session_id}
+    html: |
+      <a href=events?fields=events.event_detail*&f[events.visit_id]={{value}}>Event Stream</a>
+  
+  # Session duration
+  
   - dimension: session_duration_seconds
     type: int
     sql: EXTRACT(EPOCH FROM (${TABLE}.session_end_tstamp - ${TABLE}.session_start_tstamp))
@@ -135,9 +140,17 @@
     type: tier
     tiers: [0,1,5,10,30,60,300,900]
     sql: ${session_duration_seconds}
-
-  # Events per visit and bounces (infered) #
-
+  
+  - dimension: time_engaged_with_minutes
+    sql: ${TABLE}.time_engaged_with_minutes
+  
+  - dimension: time_engaged_with_minutes_tiered
+    type: tier
+    tiers: [0,1,5,10,30,60,300,900]
+    sql: ${time_engaged_with_minutes}
+  
+  # Events per visit and bounces (infered)
+  
   - dimension: events_during_session
     type: int
     sql: ${TABLE}.event_count
@@ -151,7 +164,8 @@
     type: yesno
     sql: ${TABLE}.event_count = 1
   
-  # New vs returning visitor #
+  # New vs returning visitor
+  
   - dimension: new_vs_returning_visitor
     sql_case:
       new: ${TABLE}.domain_sessionidx = 1
@@ -161,14 +175,8 @@
       <%= linked_value %>
       <a href="/dashboards/snowplow_ssd/traffic_pulse?new_vs_returning=<%= value %>" target="_new">
       <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
-
-  # Pages visited #
-  - dimension: event_stream
-    sql: ${session_id}
-    html: |
-      <a href=events?fields=events.events_detail*&f[events.session_id]=<%= value%>>Event Stream</a>
   
-  # Geo fields #
+  # Geo fields
   
   - dimension: geography_country
     sql: ${TABLE}.geo_country
@@ -176,55 +184,55 @@
       <%= linked_value %>
       <a href="/dashboards/snowplow_ssd/traffic_pulse?country=<%= value %>" target="_new">
       <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
-    
+  
   - dimension: geography_country_three_letter_iso_code
     sql: ${TABLE}.geo_country_code_3_characters
-    
+  
   - dimension: geography_country_two_letter_iso_code
     sql: ${TABLE}.geo_country_code_2_characters
   
   - dimension: geography_region
     sql: ${TABLE}.geo_region
-    
+  
   - dimension: geography_city
     sql: ${TABLE}.geo_city
-    
-  - dimension: geography_zipcode
-    sql: ${TABLE}.geo_zipcode
-    
-  - dimension: geography_latitude
-    sql: ${TABLE}.geo_latitude
   
-  - dimension: geography_longitude
-    sql: ${TABLE}.geo_longitude
-    
+  #- dimension: geography_zipcode
+  #  sql: ${TABLE}.geo_zipcode
+  
+  #- dimension: geography_latitude
+  #  sql: ${TABLE}.geo_latitude
+  
+  #- dimension: geography_longitude
+  #  sql: ${TABLE}.geo_longitude
+  
   # Landing page
-    
+  
   - dimension: landing_page_host
     sql: ${TABLE}.landing_page_urlhost
-    
+  
   - dimension: landing_page_path
     sql: ${TABLE}.landing_page_path
     html: |
       <%= linked_value %>
       <a href="/dashboards/snowplow_ssd/traffic_pulse?landing_page=<%= value %>%25" target="_new">
       <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
-    
+  
   - dimension: landing_page
     sql: ${TABLE}.landing_page_host || ${TABLE}.landing_page_path
-    
+  
   # Exit page
   
   - dimension: exit_page_host
     sql: ${TABLE}.exit_page_host
-    
+  
   - dimension: exit_page_path
     sql: ${TABLE}.exit_page_path
-    
+  
   - dimension: exit_page
     sql: ${TABLE}.exit_page_host || ${TABLE}.exit_page_path
-    
-  # Marketing / traffic source fields
+  
+  # Referer fields (all acquisition channels)
   
   - dimension: referer_medium
     sql_case:
@@ -237,42 +245,43 @@
       <%= linked_value %>
       <a href="/dashboards/snowplow_ssd/traffic_pulse?referer_medium=<%= value %>" target="_new">
       <img src="/images/qr-graph-line@2x.png" height=20 width=20></a>
-    
+  
   - dimension: referer_source
     sql: ${TABLE}.refr_source
-    
+  
   - dimension: referer_term
     sql: ${TABLE}.refr_term
-    
+  
   - dimension: referer_url_host
     sql: ${TABLE}.refr_urlhost
   
   - dimension: referer_url_path
     sql: ${TABLE}.refr_urlpath
-    
+  
   # Marketing fields (paid acquisition channels)
-
-  - dimension: campaign_source
-    sql: ${TABLE}.mkt_source
-
+  
   - dimension: campaign_medium
     sql: ${TABLE}.mkt_medium
+  
+  - dimension: campaign_source
+    sql: ${TABLE}.mkt_source
   
   - dimension: campaign_term
     sql: ${TABLE}.mkt_term
   
+  - dimension: campaign_name
+    sql: ${TABLE}.mkt_campaign
+  
   - dimension: campaign_content
     sql: ${TABLE}.mkt_content
   
-  - dimension: campaign_name
-    sql: ${TABLE}.mkt_campaign
-
-  # Device fields #
+  # Device fields
     
   - dimension: device_type
     sql: ${TABLE}.dvce_type
     
   - dimension: device_is_mobile
+    type: yesno
     sql: ${TABLE}.dvce_ismobile
     
   - dimension: device_screen_width
@@ -281,7 +290,7 @@
   - dimension: device_screen_height
     sql: ${TABLE}.dvce_screenheight
     
-  # OS fields #
+  # OS fields
     
   - dimension: operating_system
     sql: ${TABLE}.os_name
@@ -292,51 +301,64 @@
   - dimension: operating_system_manufacturer
     sql: ${TABLE}.os_manufacturer
     
-  # Browser fields #
+  # Browser fields
   
   - dimension: browser
     sql: ${TABLE}.br_name
-    
+  
+  - dimension: browser_family
+    sql: ${TABLE}.br_family
+  
   - dimension: browser_version
     sql: ${TABLE}.br_version
-    
+  
   - dimension: browser_type
     sql: ${TABLE}.br_type
-    
+  
   - dimension: browser_renderengine
     sql: ${TABLE}.br_renderengine
-    
+  
   - dimension: browser_language
     sql: ${TABLE}.br_lang
-    
+  
   - dimension: browser_has_director_plugin
+    type: yesno
     sql: ${TABLE}.br_features_director
-    
+  
   - dimension: browser_has_flash_plugin
+    type: yesno
     sql: ${TABLE}.br_features_flash
-    
+  
   - dimension: browser_has_gears_plugin
+    type: yesno
     sql: ${TABLE}.br_features_gears
-    
+  
   - dimension: browser_has_java_plugin
+    type: yesno
     sql: ${TABLE}.br_features_java
-    
+  
   - dimension: browser_has_pdf_plugin
+    type: yesno
     sql: ${TABLE}.br_features_pdf
-    
+  
   - dimension: browser_has_quicktime_plugin
+    type: yesno
     sql: ${TABLE}.br_features_quicktime
-    
+  
   - dimension: browser_has_realplayer_plugin
+    type: yesno
     sql: ${TABLE}.br_features_realplayer
-    
+  
   - dimension: browser_has_silverlight_plugin
+    type: yesno
     sql: ${TABLE}.br_features_silverlight
-    
+  
   - dimension: browser_has_windowsmedia_plugin
+    type: yesno
     sql: ${TABLE}.br_features_windowsmedia
-    
+  
   - dimension: browser_supports_cookies
+    type: yesno
     sql: ${TABLE}.br_cookies
   
   # MEASURES #
@@ -401,6 +423,7 @@
     sql: ${events_count}/NULLIF(${visitors_count},0)::REAL
     
   # Geo measures
+  
   - measure: country_count
     type: count_distinct
     sql: ${geography_country}
@@ -514,7 +537,8 @@
     - browser
     - detail*
     
-  # Drill Fields #
+  # DRILL FIELDS #
+  
   sets:
   
     detail:

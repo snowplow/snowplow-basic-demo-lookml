@@ -44,7 +44,7 @@
   
   # DIMENSIONS #
   
-  # Basic dimensions #
+  # Basic dimensions
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
@@ -53,7 +53,7 @@
     type: int
     sql: ${TABLE}.domain_sessionidx
   
-  # Exit page dimensions #
+  # Exit page dimensions
   
   - dimension: exit_page_host
     sql: ${TABLE}.page_urlhost
@@ -61,11 +61,14 @@
   - dimension: exit_page_path
     sql: ${TABLE}.page_urlpath
   
+  - dimension: exit_page
+    sql: ${TABLE}.exit_page_host || ${TABLE}.exit_page_path
+  
   # MEASURES #
   
   - measure: exit_page_path_count
     type: count_distinct
-    sql: ${page_urlpath}
+    sql: ${exit_page}
   
   - measure: count
     type: count

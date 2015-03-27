@@ -47,7 +47,7 @@
   
   # DIMENSIONS #
   
-  # Basic dimensions #
+  # Basic dimensions
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
@@ -80,7 +80,7 @@
     html: |
       <a href=events?fields=events.event_detail*&f[events.visit_id]={{value}}>Event Stream</a>
 
-  # Session duration #
+  # Session duration
 
   - dimension: session_duration_seconds
     type: int
@@ -99,7 +99,7 @@
     tiers: [0,1,5,10,30,60,300,900]
     sql: ${time_engaged_with_minutes}
   
-  # Events per visit and bounces (infered) #
+  # Events per visit and bounces (infered)
   
   - dimension: events_during_session
     type: int
@@ -109,7 +109,7 @@
     type: yesno
     sql: ${TABLE}.event_count = 1
   
-  # New versus returning visitor #
+  # New versus returning visitor
   
   - dimension: new_vs_returning_visitor
     sql_case:
