@@ -31,18 +31,20 @@
         INNER JOIN ${sessions_basic.SQL_TABLE_NAME} AS b
           ON  a.domain_userid = b.domain_userid
           AND a.domain_sessionidx = b.domain_sessionidx
-          AND a.dvce_tstamp = b.dvce_max_tstamp -- Replaces the LAST VALUE window function in SQL
+          AND a.dvce_tstamp = b.dvce_max_tstamp
         GROUP BY 1,2,3,4 -- Aggregate identital rows (that happen to have the same dvce_tstamp)
       )
       WHERE rank = 1 -- If there are different rows with the same dvce_tstamp, rank and pick the first row
-
+    
     sql_trigger_value: SELECT COUNT(*) FROM ${sessions_landing_page.SQL_TABLE_NAME} # Generate this table after sessions_landing_page
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx]
-
+  
   fields:
-    
+  
   # DIMENSIONS #
+  
+  # Basic dimensions #
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
@@ -50,14 +52,21 @@
   - dimension: session_index
     type: int
     sql: ${TABLE}.domain_sessionidx
-
+  
+  # Exit page dimensions #
+  
   - dimension: exit_page_host
     sql: ${TABLE}.page_urlhost
-    
+  
   - dimension: exit_page_path
     sql: ${TABLE}.page_urlpath
-    
+  
   # MEASURES #
-    
+  
+  - measure: exit_page_path_count
+    type: count_distinct
+    sql: ${page_urlpath}
+  
   - measure: count
     type: count
+  
