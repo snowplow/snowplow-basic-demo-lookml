@@ -555,7 +555,7 @@
   
     detail:
       - count
-      - visitors.count
+      #- visitors.count
       - bounce_rate
       - sessions_from_new_visitors_count
       - sessions_from_returning_visitors_count
@@ -563,7 +563,7 @@
       - country_count
       - region_count
       - city_count
-      - zipe_code_count
+      #- zip_code_count
       - campaign_medium_count
       - campaign_source_count
       - campaign_term_count
@@ -578,7 +578,7 @@
     individual_detail:
       - user_id
       - session_index
-      - visitors.first_touch_date
+      #- visitors.first_touch_date
       - referer_medium
       - referer_source
       - referer_url_host
@@ -586,8 +586,7 @@
       - campaign_medium
       - campaign_source
       - campaign_name
-      - start_time
+      - start
       - session_duration_seconds
       - events_during_session
-      - distinct_pages_viewed
       - event_stream
