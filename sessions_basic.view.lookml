@@ -32,13 +32,14 @@
       WHERE domain_sessionidx IS NOT NULL
         AND domain_userid IS NOT NULL
         AND domain_userid != ''
-        AND e.dvce_tstamp IS NOT NULL
-        AND e.dvce_tstamp > '2000-01-01' -- Prevent SQL errors
-        AND e.dvce_tstamp < '2030-01-01' -- Prevent SQL errors
+        AND dvce_tstamp IS NOT NULL
+        AND dvce_tstamp > '2000-01-01' -- Prevent SQL errors
+        AND dvce_tstamp < '2030-01-01' -- Prevent SQL errors
         -- if dev -- AND collector_tstamp > '2015-03-20'
       GROUP BY 1,2
   
-    sql_trigger_value: SELECT MAX(collector_tstamp) FROM ${events.SQL_TABLE_NAME}  # Trigger table generation when new data was loaded into atomic.events
+    sql_trigger_value: SELECT MAX(collector_tstamp) FROM atomic.events
+    #sql_trigger_value: SELECT MAX(collector_tstamp) FROM ${events.SQL_TABLE_NAME}  # Trigger table generation when new data was loaded into atomic.events
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx]
   
