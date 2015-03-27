@@ -66,11 +66,11 @@
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
-    
+  
   - dimension: session_index
     type: int
     sql: ${TABLE}.domain_sessionidx
-    
+  
   # Referer fields (all acquisition channels)
     
   - dimension: referer_medium
@@ -80,19 +80,19 @@
       social: ${TABLE}.refr_medium = 'social'
       other_website: ${TABLE}.refr_medium = 'unknown'
       else: direct
-    
+  
   - dimension: referer_source
     sql: ${TABLE}.refr_source
-    
+  
   - dimension: referer_term
     sql: ${TABLE}.refr_term
-    
+  
   - dimension: referer_url_host
     sql: ${TABLE}.refr_urlhost
   
   - dimension: referer_url_path
     sql: ${TABLE}.refr_urlpath
-    
+  
   # Marketing fields (paid acquisition channels)
   
   - dimension: campaign_medium
