@@ -11,7 +11,7 @@
 #
 # Version: 3-0-0
 #
-# Author(s): Yali Sassoon, Christophe
+# Authors: Yali Sassoon, Christophe Bogaert
 # Copyright: Copyright (c) 2013-2015 Snowplow Analytics Ltd
 # License: Apache License Version 2.0
 
@@ -38,7 +38,7 @@
 #- base_view: atomic_events
 
 - explore: sessions
-#  joins: 
+#  joins:
 #  - join: visitors
 #    sql_on: |
 #      sessions.domain_userid = visitors.domain_userid
