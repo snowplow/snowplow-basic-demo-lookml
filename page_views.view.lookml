@@ -55,28 +55,44 @@
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
+    
+  - dimension: session_index
+    type: int
+    sql: ${TABLE}.domain_sessionidx
   
-  - dimension: first_touch
+  - dimension: session_id
+    sql: ${TABLE}.domain_userid || '-' || ${TABLE}.domain_sessionidx
+  
+  - dimension: page_host
+    sql: ${TABLE}.page_urlhost
+  
+  - dimension: page_path
+    sql: ${TABLE}.page_urlpath
+  
+  - dimension: page
+    sql: ${TABLE}.page_urlhost ||${TABLE}.page_urlpath
+  
+  - dimension: start
     sql: ${TABLE}.first_touch_tstamp
   
-  - dimension_group: first_touch
+  - dimension_group: start
     type: time
     timeframes: [time, hour, date, week, month]
     sql: ${TABLE}.first_touch_tstamp
-  
-  - dimension: last_touch
+    
+  - dimension: end
     sql: ${TABLE}.last_touch_tstamp
   
-  - dimension: last_touch
+  - dimension_group: end
     type: time
     timeframes: [time, hour, date, week, month]
     sql: ${TABLE}.last_touch_tstamp
   
-  - dimension: events_during_lifetime
+  - dimension: events_during_page_view
     type: int
     sql: ${TABLE}.event_count
   
-  - dimension: events_during_lifetime_tiered
+  - dimension: events_during_page_view_tiered
     type: tier
     tiers: [1,5,10,25,50,100,1000,10000,100000]
     sql: ${TABLE}.event_count
@@ -85,74 +101,28 @@
     type: yesno
     sql: ${TABLE}.event_count = 1
   
-  - dimension: number_of_sessions
+  - dimension: number_of_page_views
     type: int
-    sql: ${TABLE}.session_count
+    sql: ${TABLE}.page_view_count
   
-  - dimension: number_of_sessions_tiered
+  - dimension: number_of_page_views_tiered
     type: tier
     tiers: [1,2,5,10,25,50,100,1000]
-    sql: ${number_of_sessions}
+    sql: ${number_of_page_views}
   
-  - dimension: session_stream
-    sql: ${user_id}
-    html: |
-      <a href=sessions?fields=sessions.individual_detail*&f[sessions.user_id]={{value}}>Session Stream</a>
+  - dimension: number_of_page_pings
+    type: int
+    sql: ${TABLE}.page_view_count
+  
+  - dimension: number_of_page_pings_tiered
+    type: tier
+    tiers: [1,2,5,10,25,50,100,1000]
+    sql: ${number_of_page_views}
   
   - dimension: event_stream
     sql: ${user_id}
     html: |
       <a href=events?fields=events.event_detail*&f[events.user_id]={{value}}>Event stream</a>
-  
-  # Landing page dimensions #
-  
-  - dimension: landing_page_host
-    sql: ${TABLE}.page_urlhost
-  
-  - dimension: landing_page_path
-    sql: ${TABLE}.page_urlpath
-  
-  - dimension: landing_page
-    sql: ${TABLE}.page_urlhost || ${TABLE}.page_urlpath
-  
-  # Referer fields (all acquisition channels)
-  
-  - dimension: referer_medium
-    sql_case:
-      email: ${TABLE}.refr_medium = 'email'
-      search: ${TABLE}.refr_medium = 'search'
-      social: ${TABLE}.refr_medium = 'social'
-      other_website: ${TABLE}.refr_medium = 'unknown'
-      else: direct
-  
-  - dimension: referer_source
-    sql: ${TABLE}.refr_source
-  
-  - dimension: referer_term
-    sql: ${TABLE}.refr_term
-  
-  - dimension: referer_url_host
-    sql: ${TABLE}.refr_urlhost
-  
-  - dimension: referer_url_path
-    sql: ${TABLE}.refr_urlpath
-  
-  # Marketing fields (paid acquisition channels)
-  
-  - dimension: campaign_medium
-    sql: ${TABLE}.mkt_medium
-  
-  - dimension: campaign_source
-    sql: ${TABLE}.mkt_source
-  
-  - dimension: campaign_term
-    sql: ${TABLE}.mkt_term
-  
-  - dimension: campaign_name
-    sql: ${TABLE}.mkt_campaign
-  
-  - dimension: campaign_content
-    sql: ${TABLE}.mkt_content
   
   # MEASURES #
   

@@ -75,7 +75,12 @@
     
   - dimension: end
     sql: ${TABLE}.session_end_tstamp
-
+  
+  - dimension_group: end
+    type: time
+    timeframes: [time, hour, date, week, month]
+    sql: ${TABLE}.session_end_tstamp
+  
   - dimension: history
     sql: ${session_id}
     html: |
