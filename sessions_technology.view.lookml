@@ -67,36 +67,36 @@
     
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx]
-  
+    
   fields:
   
   # DIMENSIONS #
   
-  # Basic dimensions
+  # Basic dimensions #
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
-  
+    
   - dimension: session_index
     type: int
     sql: ${TABLE}.domain_sessionidx
-  
-  # Device fields
-  
+    
+  # Device fields #
+    
   - dimension: device_type
     sql: ${TABLE}.dvce_type
-  
+    
   - dimension: device_is_mobile
     type: yesno
     sql: ${TABLE}.dvce_ismobile
-  
+    
   - dimension: device_screen_width
     sql: ${TABLE}.dvce_screenwidth
-  
+    
   - dimension: device_screen_height
     sql: ${TABLE}.dvce_screenheight
-  
-  # OS fields
+    
+  # OS fields #
     
   - dimension: operating_system
     sql: ${TABLE}.os_name
@@ -107,66 +107,66 @@
   - dimension: operating_system_manufacturer
     sql: ${TABLE}.os_manufacturer
     
-  # Browser fields
+  # Browser fields #
   
   - dimension: browser
     sql: ${TABLE}.br_name
   
   - dimension: browser_family
     sql: ${TABLE}.br_family
-  
+
   - dimension: browser_version
     sql: ${TABLE}.br_version
-  
+    
   - dimension: browser_type
     sql: ${TABLE}.br_type
-  
+    
   - dimension: browser_renderengine
     sql: ${TABLE}.br_renderengine
-  
+    
   - dimension: browser_language
     sql: ${TABLE}.br_lang
-  
+    
   - dimension: browser_has_director_plugin
     type: yesno
     sql: ${TABLE}.br_features_director
-  
+    
   - dimension: browser_has_flash_plugin
     type: yesno
     sql: ${TABLE}.br_features_flash
-  
+    
   - dimension: browser_has_gears_plugin
     type: yesno
     sql: ${TABLE}.br_features_gears
-  
+    
   - dimension: browser_has_java_plugin
     type: yesno
     sql: ${TABLE}.br_features_java
-  
+    
   - dimension: browser_has_pdf_plugin
     type: yesno
     sql: ${TABLE}.br_features_pdf
-  
+    
   - dimension: browser_has_quicktime_plugin
     type: yesno
     sql: ${TABLE}.br_features_quicktime
-  
+    
   - dimension: browser_has_realplayer_plugin
     type: yesno
     sql: ${TABLE}.br_features_realplayer
-  
+    
   - dimension: browser_has_silverlight_plugin
     type: yesno
     sql: ${TABLE}.br_features_silverlight
-  
+    
   - dimension: browser_has_windowsmedia_plugin
     type: yesno
     sql: ${TABLE}.br_features_windowsmedia
-  
+    
   - dimension: browser_supports_cookies
     type: yesno
     sql: ${TABLE}.br_cookies
-  
+    
   # MEASURES #
   
   - measure: device_count

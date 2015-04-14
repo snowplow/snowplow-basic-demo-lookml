@@ -16,7 +16,7 @@
 # License: Apache License Version 2.0
 
 - view: visitors_basic
-  derived_table:
+  derived_table: 
     sql: |
       SELECT
         domain_userid,
@@ -46,12 +46,12 @@
   fields:
   
   # DIMENSIONS #
-  
+
   # Basic dimensions
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
-  
+    
   - dimension: first_touch
     sql: ${TABLE}.first_touch_tstamp
     
@@ -59,10 +59,7 @@
     type: time
     timeframes: [time, date, week, month]
     sql: ${TABLE}.first_touch_tstamp
-  
-  - dimension: last_touch
-    sql: ${TABLE}.last_touch_tstamp
-  
+    
   - dimension: last_touch
     type: time
     timeframes: [time, date, week, month]
@@ -79,7 +76,16 @@
     
   - dimension: bounce
     type: yesno
-    sql: ${event_count} = 1
+    sql: ${number_of_events} = 1
+    
+  - dimension: number_of_page_views
+    type: int
+    sql: ${TABLE}.page_view_count
+    
+  - dimension: number_of_page_views_tiered
+    type: tier
+    tiers: [1,2,5,10,25,50,100,1000]
+    sql: ${number_of_page_views}
     
   - dimension: number_of_sessions
     type: int
@@ -89,21 +95,28 @@
     type: tier
     tiers: [1,2,5,10,25,50,100,1000]
     sql: ${number_of_sessions}
-    
+
+  - dimension: time_engaged_with_minutes
+    sql: ${TABLE}.time_engaged_with_minutes
+  
+  - dimension: time_engaged_with_minutes_tiered
+    type: tier
+    tiers: [0,1,5,10,30,60,300,900]
+    sql: ${time_engaged_with_minutes}
+  
   - dimension: session_stream
     sql: ${user_id}
     html: |
       <a href=sessions?fields=sessions.individual_detail*&f[sessions.user_id]={{value}}>Session Stream</a>
-      
+  
   - dimension: event_stream
     sql: ${user_id}
     html: |
       <a href=events?fields=events.individual_detail*&f[events.user_id]={{value}}>Event stream</a>
   
   # MEASURES #
-  
+
   - measure: count
     type: count_distinct
     sql: ${user_id}
-    drill_fields: detail*
-    
+    detail: detail*

@@ -35,15 +35,13 @@
         AND dvce_tstamp IS NOT NULL
         AND dvce_tstamp > '2000-01-01' -- Prevent SQL errors
         AND dvce_tstamp < '2030-01-01' -- Prevent SQL errors
-        -- if dev -- AND collector_tstamp > '2015-03-20'
+        -- if dev -- AND collector_tstamp > DATEADD (day, -2, GETDATE())
       GROUP BY 1,2
-  
-    sql_trigger_value: SELECT MAX(collector_tstamp) FROM atomic.events
-    #sql_trigger_value: SELECT MAX(collector_tstamp) FROM ${events.SQL_TABLE_NAME}  # Trigger table generation when new data was loaded into atomic.events
+
+    sql_trigger_value: SELECT MAX(collector_tstamp) FROM ${events.SQL_TABLE_NAME}  # Trigger table generation when new data loaded into atomic.events
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx]
-  
-  
+
   fields:
   
   # DIMENSIONS #
@@ -75,17 +73,7 @@
     
   - dimension: end
     sql: ${TABLE}.session_end_tstamp
-  
-  - dimension_group: end
-    type: time
-    timeframes: [time, hour, date, week, month]
-    sql: ${TABLE}.session_end_tstamp
-  
-  - dimension: history
-    sql: ${session_id}
-    html: |
-      <a href=events?fields=events.event_detail*&f[events.visit_id]={{value}}>Event Stream</a>
-
+    
   # Session duration
 
   - dimension: session_duration_seconds
@@ -96,7 +84,7 @@
     type: tier
     tiers: [0,1,5,10,30,60,300,900]
     sql: ${session_duration_seconds}
-  
+
   - dimension: time_engaged_with_minutes
     sql: ${TABLE}.time_engaged_with_minutes
   
@@ -104,9 +92,9 @@
     type: tier
     tiers: [0,1,5,10,30,60,300,900]
     sql: ${time_engaged_with_minutes}
-  
+
   # Events per visit and bounces (infered)
-  
+
   - dimension: events_during_session
     type: int
     sql: ${TABLE}.event_count
@@ -115,21 +103,28 @@
     type: yesno
     sql: ${TABLE}.event_count = 1
   
-  # New versus returning visitor
-  
+  # New vs returning visitor
+
   - dimension: new_vs_returning_visitor
     sql_case:
       new: ${TABLE}.domain_sessionidx = 1
       returning: ${TABLE}.domain_sessionidx > 1
       else: unknown
   
-  # MEASURES #
+  # Event history
+
+  - dimension: history
+    sql: ${session_id}
+    html: |
+      <a href=events?fields=events.event_detail*&f[events.session_id]={{value}}>Event Stream</a>
   
+  # MEASURES #
+
   - measure: count
     type: count_distinct
     sql: ${session_id}
     drill_fields: detail*
-  
+
   - measure: visitors_count
     type: count_distinct
     sql: ${user_id}
@@ -142,7 +137,7 @@
     filters:
       bounce: yes
     drill_fields: detail*
-  
+
   - measure: bounce_rate
     type: number
     decimals: 2
@@ -165,7 +160,7 @@
     decimals: 2
     sql: ${sessions_from_new_visitors_count}/NULLIF(${count},0)::REAL
     drill_fields: detail*
-  
+
   - measure: returning_visitors_count_over_total_visitors_count
     type: number
     decimals: 2
@@ -175,7 +170,7 @@
   - measure: average_session_duration_seconds
     type: average
     sql: EXTRACT(EPOCH FROM (${end}-${start}))
-  
+      
   - measure: average_time_engaged_minutes
     type: average
     sql: ${time_engaged_with_minutes}

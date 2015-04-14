@@ -17,21 +17,27 @@
 
 - connection: snowplow_demo
 
-- scoping: true                   # for backward compatibility
-- include: "*.view.lookml"        # include all the views
-- include: "*.dashboard.lookml"   # include all the dashboards
+- scoping: true                  # for backward compatibility
+- include: "*.view.lookml"       # include all the views
+- include: "*.dashboard.lookml"  # include all the dashboards
 
-- explore: sessions
-  joins:
-  - join: visitors
-    sql_on: |
-      sessions.domain_userid = visitors.domain_userid
-
-- explore: visitors
-
-- explore: page_views
+- explore: events
   joins:
   - join: sessions
     sql_on: |
-      page_views.domain_userid = sessions.domain_userid AND page_views.domain_sessionidx = sessions.domain_sessionidx
-  
+      events.domain_userid = sessions.domain_userid AND
+      events.domain_sessionidx = sessions.domain_sessionidx
+    relationship: many_to_one
+  - join: visitors
+    sql_on: |
+      events.domain_userid = visitors.domain_userid
+    relationship: many_to_one
+
+- explore: sessions
+  joins: 
+  - join: visitors
+    sql_on: |
+      sessions.domain_userid = visitors.domain_userid
+    relationship: many_to_one
+
+- explore: visitors

@@ -19,59 +19,58 @@
   derived_table:
     sql: |
       SELECT
-      domain_userid, 
-      domain_sessionidx,
-      event_id,
-      event,
-      collector_tstamp,
-      dvce_tstamp,
-      page_title,
-      page_urlscheme,
-      page_urlhost,
-      page_urlpath,
-      page_urlport,
-      page_urlquery,
-      page_urlfragment,
-      refr_medium,
-      refr_source,
-      refr_term,
-      refr_urlhost,
-      refr_urlpath,
-      pp_xoffset_max,
-      pp_xoffset_min,
-      pp_yoffset_max,
-      pp_yoffset_min,
-      se_category,
-      se_action,
-      se_label,
-      se_property,
-      se_value,
-      doc_height,
-      doc_width,
-      tr_orderid,
-      tr_affiliation,
-      tr_total,
-      tr_tax,
-      tr_city,
-      tr_state,
-      tr_country,
-      ti_orderid,
-      ti_category,
-      ti_sku,
-      ti_name,
-      ti_price,
-      ti_quantity
+        domain_userid, 
+        domain_sessionidx,
+        event_id,
+        event,
+        collector_tstamp,
+        dvce_tstamp,
+        page_title,
+        page_urlscheme,
+        page_urlhost,
+        page_urlpath,
+        page_urlport,
+        page_urlquery,
+        page_urlfragment,
+        refr_medium,
+        refr_source,
+        refr_term,
+        refr_urlhost,
+        refr_urlpath,
+        pp_xoffset_max,
+        pp_xoffset_min,
+        pp_yoffset_max,
+        pp_yoffset_min,
+        se_category,
+        se_action,
+        se_label,
+        se_property,
+        se_value,
+        doc_height,
+        doc_width,
+        tr_orderid,
+        tr_affiliation,
+        tr_total,
+        tr_tax,
+        tr_city,
+        tr_state,
+        tr_country,
+        ti_orderid,
+        ti_category,
+        ti_sku,
+        ti_name,
+        ti_price,
+        ti_quantity
       FROM atomic.events
       WHERE domain_userid IS NOT NULL
-      AND
-      -- if prod -- collector_tstamp > '2014-01-01'
-      -- if dev  -- collector_tstamp > DATEADD (day, -2, GETDATE())
+      -- if dev  -- AND collector_tstamp > DATEADD (day, -2, GETDATE())
     
     sql_trigger_value: SELECT MAX(collector_tstamp) FROM atomic.events
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx, collector_tstamp]
-    
+  
   fields:
+
   # DIMENSIONS #
   
   - dimension: event_id
@@ -80,7 +79,7 @@
   
   - dimension: event_type
     sql: ${TABLE}.event
-    
+  
   - dimension: timestamp
     sql: ${TABLE}.collector_tstamp
 
@@ -198,36 +197,34 @@
   - dimension: page_width
     type: int
     sql: ${TABLE}.doc_width
-    
-  # Transaction fields #
   
-# MEASURES #
+  # MEASURES #
 
   - measure: count
     type: count
-    detail: event_detail*
+    drill_fields: event_detail*
 
   - measure: page_pings_count
     type: count
-    detail: event_detail*
+    drill_fields: event_detail*
     filters:
       event_type: page_ping
       
   - measure: page_views_count
     type: count
-    detail: page_views_detail*
+    drill_fields: page_views_detail*
     filters:
       event_type: page_view
 
   - measure: distinct_pages_viewed_count
     type: count_distinct
-    detail: page_views_detail*
+    drill_fields: page_views_detail*
     sql: ${page_url_path}
     
   - measure: sessions_count
     type: count_distinct
     sql: ${session_id}
-    detail: detail*
+    drill_fields: detail*
     
   - measure: page_pings_per_session
     type: number
@@ -242,7 +239,7 @@
   - measure: visitors_count
     type: count_distinct
     sql: ${user_id}
-    detail: visitors_detail
+    drill_fields: visitors_detail
     hidden: true  # Not to be shown in the UI (in UI only show visitors count for visitors table)
     
   - measure: events_per_session
@@ -292,13 +289,12 @@
     decimals: 2
     sql: ${approx_user_usage_in_minutes}/NULLIF(${sessions_count}, 0)::REAL
   
-  
-  # ----- Detail ------
+  # DRILL FIELDS#
+
   sets:
     event_detail:
       - session_index
       - event_type
-      - timestamp_time
       - device_timestamp
       - page_url_host
       - page_url_path
@@ -306,31 +302,22 @@
     page_views_detail:
       - page_url_host
       - page_url_path
-      - timestamp_time
       - device_timestamp
     
-    visit_detail:
+    session_detail:
       - user_id
-      - domain_session_index
-      - sessions.timestamp_time
-      - source.refr_url_host
-      - source.refr_url_path
-      - landing_page.landing_page
-      - sessions.visit_duration_seconds
+      - session_index
+      - sessions.referer_url_host
+      - sessions.referer_url_path
+      - sessions.landing_page
+      - sessions.session_duration_seconds
       - count
-      - sessions.distinct_pages_viewed
-      - sessions.history 
-      
-    visitors_detail:
+    
+    visitor_detail:
       - user_id
-      - visitors.first_touch_time
-      - source_first_visit.refr_url_host
-      - source_first_visit.refr_url_path
-      - landing_page_first_visit.page_url_path
-      - visitors.last_touch_time
-      - visitors.lifetime_sessions
-      - visitors.visit_history
-      - visitors.lifetime_distinct_pages_viewed
-      - visitors.lifetime_events
-      - visitors.event_history
-      - visitors.history
+      - visitors.first_touch
+      - visitor.referer_url_host
+      - visitors.referer_url_path
+      - visitors.last_touch
+      - visitors.number_of_sessions
+      - visitors.event_stream

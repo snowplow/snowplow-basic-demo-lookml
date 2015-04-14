@@ -35,41 +35,36 @@
         GROUP BY 1,2,3,4 -- Aggregate identital rows (that happen to have the same dvce_tstamp)
       )
       WHERE rank = 1 -- If there are different rows with the same dvce_tstamp, rank and pick the first row
-    
-    sql_trigger_value: SELECT COUNT(*) FROM ${sessions_geo.SQL_TABLE_NAME} # Generate this table after the sessions_geo table
+
+    sql_trigger_value: SELECT COUNT(*) FROM ${sessions_geo.SQL_TABLE_NAME} # Generate this table after sessions_geo
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx]
-  
+
   fields:
     
   # DIMENSIONS #
   
-  # Basic dimensions
-  
   - dimension: user_id
     sql: ${TABLE}.domain_userid
-  
+    
   - dimension: session_index
     type: int
     sql: ${TABLE}.domain_sessionidx
-  
-  # Landing page dimensions
-  
-  - dimension: landing_page_host
+
+  - dimension: landing_page_url_host
     sql: ${TABLE}.page_urlhost
-  
-  - dimension: landing_page_path
+    
+  - dimension: landing_page_url_path
     sql: ${TABLE}.page_urlpath
-  
-  - dimension: landing_page
+    
+  - dimension: landing_page_url
     sql: ${TABLE}.page_urlhost || ${TABLE}.page_urlpath
   
   # MEASURES #
-  
-  - measure: landing_page_count
-    type: count_distinct
-    sql: ${landing_page}
-  
+    
   - measure: count
     type: count
-  
+    
+  - measure: landing_page_count
+    type: count_distinct
+    sql: ${landing_page_url}

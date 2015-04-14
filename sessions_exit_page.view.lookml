@@ -35,16 +35,14 @@
         GROUP BY 1,2,3,4 -- Aggregate identital rows (that happen to have the same dvce_tstamp)
       )
       WHERE rank = 1 -- If there are different rows with the same dvce_tstamp, rank and pick the first row
-    
-    sql_trigger_value: SELECT COUNT(*) FROM ${sessions_landing_page.SQL_TABLE_NAME} # Generate this table after sessions_landing_page
+
+    sql_trigger_value: SELECT COUNT(*) FROM ${sessions_landing_page.SQL_TABLE_NAME} # Generate this table after sessions_landing
     distkey: domain_userid
     sortkeys: [domain_userid, domain_sessionidx]
-  
+
   fields:
-  
+    
   # DIMENSIONS #
-  
-  # Basic dimensions
   
   - dimension: user_id
     sql: ${TABLE}.domain_userid
@@ -52,24 +50,21 @@
   - dimension: session_index
     type: int
     sql: ${TABLE}.domain_sessionidx
-  
-  # Exit page dimensions
-  
+
   - dimension: exit_page_host
     sql: ${TABLE}.page_urlhost
-  
+    
   - dimension: exit_page_path
     sql: ${TABLE}.page_urlpath
-  
-  - dimension: exit_page
-    sql: ${TABLE}.exit_page_host || ${TABLE}.exit_page_path
+
+  - dimension: exit_page_url
+    sql: ${TABLE}.page_urlhost || ${TABLE}.page_urlpath
   
   # MEASURES #
-  
-  - measure: exit_page_path_count
-    type: count_distinct
-    sql: ${exit_page}
-  
+    
   - measure: count
     type: count
-  
+    
+  - measure: exit_page_count
+    type: count_distinct
+    sql: ${exit_page_url}
