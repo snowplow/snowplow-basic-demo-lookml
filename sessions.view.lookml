@@ -21,8 +21,8 @@
       SELECT
         b.domain_userid,
         b.domain_sessionidx,
-        b.session_start_tstamptamp,
-        b.session_end_tstamptamp,
+        b.session_start_tstamp,
+        b.session_end_tstamp,
         b.dvce_min_tstamp,
         b.dvce_max_tstamp,
         b.event_count,
